@@ -1,5 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define ROWCOLUMN_MAX 10
 
@@ -56,11 +58,23 @@ void printBoard(int boardMatrix[][ROWCOLUMN_MAX]) {
         printf("%c", reconvertRow(i));
         for (int j = 0; j < ROWCOLUMN_MAX; j++) {
             if (boardMatrix[i][j] == 0) {
-                printf("  0");
+                printf("   ");
 
             } else if (boardMatrix[i][j] == 1) {
-                printf(" #");
+                printf("  #");
             }
+        }
+        printf("\n");
+    }
+}
+
+void printOpponentBoard(int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
+    printf("=========== MAPA OPONENTE ===========\n");
+    printf("   1  2  3  4  5  6  7  8  9  10\n");
+    for (int i = 0; i < ROWCOLUMN_MAX; i++) {
+        printf("%c", reconvertRow(i));
+        for (int j = 0; j < ROWCOLUMN_MAX; j++) {
+            printf("  ~");
         }
         printf("\n");
     }
@@ -104,6 +118,12 @@ int convertRow(char row) {
             return -1;
             break;
     }
+}
+
+int generateRandomNumber(int floor, int ceil) {
+    srand(time(NULL));
+
+    return floor + rand() % (ceil - floor + 1);
 }
 
 int validateShipPosition(int shipOp, int row, int column) {
@@ -227,27 +247,60 @@ void placeShip(int shipOp, int row, int column, int boardMatrix[][ROWCOLUMN_MAX]
     }
 }
 
+void placeOpponentShip(int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
+    int shipOp, row, column, shipPositionReturn, shipOverlapReturn, dummy = 0;
+
+    shipOp = generateRandomNumber(1, 3);
+
+    while (dummy == 0) {
+        row = generateRandomNumber(0, 8);
+        column = generateRandomNumber(0, 9);
+        if (validateShipPosition(shipOp, row, column) != 0 && validateShipOverlap(shipOp, row, column, opponentBoardMatrix) != 0) {
+            placeShip(shipOp, row, column, opponentBoardMatrix);
+            dummy = 1;
+        }
+    }
+}
+
 int main() {
-    int boardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], column, shipOp, intRow;
+    int boardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], opponentBoardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], column, shipOp, intRow, shipsQuant, countPieces = 0;
     char row;
 
     resetMatrix(boardMatrix);
-    printBoard(boardMatrix);
+    resetMatrix(opponentBoardMatrix);
 
-    printf("Digite a coordenada para posicionamento do navio: \n");
-    scanf("%c%d", &row, &column);
-    printf("Escolha o tipo de Navio: \n");
-    scanf("%d", &shipOp);
+    printf("Digite a quantidade de navios de cada jogador na partida: \n");
+    scanf("%d", &shipsQuant);
 
-    printf("Linha: %c \n", row);
-    printf("Coluna: %d \n", column);
-    intRow = convertRow(row);
-    printf("Coluna convertida: %d\n", intRow);
-    printf("Tipo de barco: %d \n", shipOp);
+    while (shipsQuant > 0) {
+        printf("Escolha o tipo de Navio: \n");
+        scanf("%d", &shipOp);
+        printf("Digite a coordenada para posicionamento do navio: \n");
+        scanf(" %c%d", &row, &column);
 
-    placeShip(shipOp, intRow, column, boardMatrix);
-    printBoard(boardMatrix);
-    printf("\n");
+        column--;
+        intRow = convertRow(row);
+
+        if (validateShipPosition(shipOp, intRow, column) && validateShipOverlap(shipOp, intRow, column, boardMatrix) == 1) {
+            placeShip(shipOp, intRow, column, boardMatrix);
+            placeOpponentShip(opponentBoardMatrix);
+            shipsQuant--;
+            printBoard(boardMatrix);
+            printf("\n");
+            if (shipOp == 1) {
+                countPieces += 4;
+            } else if (shipOp == 2) {
+                countPieces += 6;
+            } else if (shipOp == 3) {
+                countPieces += 6;
+            }
+        } else {
+            printf("Posicao invalida!\n");
+        }
+    }
+    printBoard(opponentBoardMatrix);
+
+    printf("%d \n", countPieces);
 
     return 0;
 }
