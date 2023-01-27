@@ -80,6 +80,37 @@ void printOpponentBoard(int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
     }
 }
 
+void printShip(int op) {
+    switch (op) {
+        case 1:
+            for (int i = 0; i < 4; i++) {
+                printf("#\n");
+            }
+            break;
+        case 2:
+            for (int i = 0; i < 4; i++) {
+                if (i == 1) {
+                    printf("### \n");
+                } else {
+                    printf(" # \n");
+                }
+            }
+            break;
+        case 3:
+            for (int i = 0; i < 2; i++) {
+                if (i == 1) {
+                    printf("#####\n");
+                } else {
+                    printf("  #  \n");
+                }
+            }
+            break;
+        default:
+            printf("Barco Invalido!\n");
+            break;
+    }
+}
+
 int convertRow(char row) {
     char lowerCaseChar = tolower(row);
 
@@ -247,6 +278,19 @@ void placeShip(int shipOp, int row, int column, int boardMatrix[][ROWCOLUMN_MAX]
     }
 }
 
+int shipsPiecesCount(int matrix[][ROWCOLUMN_MAX]) {
+    int count = 0;
+    for (int i = 0; i < ROWCOLUMN_MAX; i++) {
+        for (int j = 0; j < ROWCOLUMN_MAX; j++) {
+            if (matrix[i][j] == 1) {
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
 void placeOpponentShip(int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
     int shipOp, row, column, shipPositionReturn, shipOverlapReturn, dummy = 0;
 
@@ -263,7 +307,7 @@ void placeOpponentShip(int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
 }
 
 int main() {
-    int boardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], opponentBoardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], column, shipOp, intRow, shipsQuant, countPieces = 0;
+    int boardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], opponentBoardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], column, shipOp, intRow, shipsQuant, countPieces, countOpponentPieces;
     char row;
 
     resetMatrix(boardMatrix);
@@ -271,6 +315,14 @@ int main() {
 
     printf("Digite a quantidade de navios de cada jogador na partida: \n");
     scanf("%d", &shipsQuant);
+
+    printf("Opções de navios disponiveis: \n");
+    printf("\n1)  \n");
+    printShip(1);
+    printf("\n2)  \n");
+    printShip(2);
+    printf("\n3)  \n");
+    printShip(3);
 
     while (shipsQuant > 0) {
         printf("Escolha o tipo de Navio: \n");
@@ -287,20 +339,16 @@ int main() {
             shipsQuant--;
             printBoard(boardMatrix);
             printf("\n");
-            if (shipOp == 1) {
-                countPieces += 4;
-            } else if (shipOp == 2) {
-                countPieces += 6;
-            } else if (shipOp == 3) {
-                countPieces += 6;
-            }
         } else {
             printf("Posicao invalida!\n");
         }
     }
+    // TESTE
     printBoard(opponentBoardMatrix);
+    // TESTE
 
-    printf("%d \n", countPieces);
+    countPieces = shipsPiecesCount(boardMatrix);
+    countOpponentPieces = shipsPiecesCount(opponentBoardMatrix);
 
     return 0;
 }
