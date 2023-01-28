@@ -62,6 +62,8 @@ void printBoard(int boardMatrix[][ROWCOLUMN_MAX]) {
 
             } else if (boardMatrix[i][j] == 1) {
                 printf("  #");
+            } else if (boardMatrix[i][j] == 2) {
+                printf("  X");
             }
         }
         printf("\n");
@@ -306,9 +308,19 @@ void placeOpponentShip(int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
     }
 }
 
+int playerAttack(int row, int column, int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
+    if (opponentBoardMatrix[row][column] == 1) {
+        opponentBoardMatrix[row][column] = 2;
+        printf("NO ALVO!!!\n");
+        return 1;
+    } else if (opponentBoardMatrix[row][column] == 0) {
+        opponentBoardMatrix[row][column] = 3;
+        return 0;
+    }
+}
+
 int main() {
-    int boardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], opponentBoardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], column, shipOp, intRow, shipsQuant, countPieces, countOpponentPieces;
-    char row;
+    int boardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], opponentBoardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], shipsQuant, countPieces, countOpponentPieces, less;
 
     resetMatrix(boardMatrix);
     resetMatrix(opponentBoardMatrix);
@@ -325,6 +337,9 @@ int main() {
     printShip(3);
 
     while (shipsQuant > 0) {
+        int shipOp, column, intRow;
+        char row;
+
         printf("Escolha o tipo de Navio: \n");
         scanf("%d", &shipOp);
         printf("Digite a coordenada para posicionamento do navio: \n");
@@ -349,6 +364,41 @@ int main() {
 
     countPieces = shipsPiecesCount(boardMatrix);
     countOpponentPieces = shipsPiecesCount(opponentBoardMatrix);
+
+    if (countPieces <= countOpponentPieces) {
+        less = countPieces;
+    } else {
+        less = countOpponentPieces;
+    }
+
+    do {
+        int column, intRow, playerAttackResult = 0;
+        char row;
+
+        printf("Digite a coordenada para ataque: \n");
+        scanf(" %c%d", &row, &column);
+        column--;
+        intRow = convertRow(row);
+        playerAttackResult = playerAttack(intRow, column, opponentBoardMatrix);
+        if (playerAttackResult == 1) {
+            countOpponentPieces--;
+        }
+
+        if (countPieces < less) {
+            less = countPieces;
+        } else if (countOpponentPieces < less) {
+            less = countOpponentPieces;
+        }
+        printf("%d \n", countOpponentPieces);
+        printBoard(opponentBoardMatrix);
+        // FAZER OUTRO IF AQUI COM O RESULTADO DO ATAQUE INIMIGO.
+    } while (less != 0);
+
+    if (countPieces == 0) {
+        printf("Fim de jogo! O oponente foi o vencedor!\n");
+    } else if (countOpponentPieces == 0) {
+        printf("Fim de jogo! Voce foi o vencedor!\n");
+    }
 
     return 0;
 }
