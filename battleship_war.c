@@ -76,7 +76,13 @@ void printOpponentBoard(int opponentBoardMatrix[][ROWCOLUMN_MAX]) {
     for (int i = 0; i < ROWCOLUMN_MAX; i++) {
         printf("%c", reconvertRow(i));
         for (int j = 0; j < ROWCOLUMN_MAX; j++) {
-            printf("  ~");
+            if (opponentBoardMatrix[i][j] == 2) {
+                printf("  X");
+            } else if (opponentBoardMatrix[i][j] == 3) {
+                printf("   ");
+            } else {
+                printf("  ~");
+            }
         }
         printf("\n");
     }
@@ -319,6 +325,38 @@ int playerAttack(int row, int column, int opponentBoardMatrix[][ROWCOLUMN_MAX]) 
     }
 }
 
+int opponentAttack(int boardMatrix[][ROWCOLUMN_MAX]) {
+    int dummy = 0;
+    char rowChar;
+
+    while (dummy == 0) {
+        int row = generateRandomNumber(0, 9), column = generateRandomNumber(0, 9);
+        if (boardMatrix[row][column] == 0) {
+            boardMatrix[row][column] = 3;
+            rowChar = reconvertRow(row);
+            printf("O oponente atacou a coordenada %c%d e errou o alvo!\n", rowChar, column);
+            return 0;
+            dummy = 1;
+        } else if (boardMatrix[row][column] == 1) {
+            boardMatrix[row][column] = 2;
+            rowChar = reconvertRow(row);
+            printf("O oponente atacou a coordenada %c%d e acertou o alvo!\n", rowChar, column);
+            return 1;
+            dummy = 1;
+        }
+    }
+}
+
+int validateAttackCoordinate(int row, int column) {
+    if ((row < 0) || (row > 9)) {
+        return 0;
+    } else if ((column < 0) || (column > 9)) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
 int main() {
     int boardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], opponentBoardMatrix[ROWCOLUMN_MAX][ROWCOLUMN_MAX], shipsQuant, countPieces, countOpponentPieces, less;
 
@@ -359,7 +397,7 @@ int main() {
         }
     }
     // TESTE
-    printBoard(opponentBoardMatrix);
+    printOpponentBoard(opponentBoardMatrix);
     // TESTE
 
     countPieces = shipsPiecesCount(boardMatrix);
@@ -372,16 +410,30 @@ int main() {
     }
 
     do {
-        int column, intRow, playerAttackResult = 0;
+        int column, intRow, playerAttackResult = 0, opponentAttackResult = 0, isValid = 0;
         char row;
 
-        printf("Digite a coordenada para ataque: \n");
-        scanf(" %c%d", &row, &column);
-        column--;
-        intRow = convertRow(row);
+        do {
+            printf("Digite a coordenada para ataque: \n");
+            scanf(" %c%d", &row, &column);
+            column--;
+            intRow = convertRow(row);
+            isValid = validateAttackCoordinate(intRow, column);
+            if (isValid != 1) {
+                printf("Coordenada invalida!\n");
+            }
+        } while (isValid != 1);
+
         playerAttackResult = playerAttack(intRow, column, opponentBoardMatrix);
         if (playerAttackResult == 1) {
+            printf("Alvo atingido!\n");
             countOpponentPieces--;
+        }
+
+        opponentAttackResult = opponentAttack(boardMatrix);
+        if (opponentAttackResult == 1) {
+            printf("Seu navio foi atingido!\n");
+            countPieces--;
         }
 
         if (countPieces < less) {
@@ -389,9 +441,8 @@ int main() {
         } else if (countOpponentPieces < less) {
             less = countOpponentPieces;
         }
-        printf("%d \n", countOpponentPieces);
-        printBoard(opponentBoardMatrix);
-        // FAZER OUTRO IF AQUI COM O RESULTADO DO ATAQUE INIMIGO.
+        printBoard(boardMatrix);
+        printOpponentBoard(opponentBoardMatrix);
     } while (less != 0);
 
     if (countPieces == 0) {
